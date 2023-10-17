@@ -10,6 +10,7 @@ class Person(BaseModel):
     first_name: str = Field(description="first name")
     last_name: str = Field(description="last name")
     dob: str = Field(description="date of birth")
+    first_trans_date: str = Field(description="date of first transaction")
 
 
 class PeopleList(BaseModel):
@@ -18,7 +19,7 @@ class PeopleList(BaseModel):
 
 model = ChatOpenAI(model="gpt-4")
 people_data = model.predict(
-    "Generate a list of 10 fake peoples information. Only return the list. Each person should have a first name, last name and date of birth.")
+    "Generate a list of 15 fake peoples information. Only return the list. Each person should have a first name, last name, date of birth and first transaction date.")
 
 parser = PydanticOutputParser(pydantic_object=PeopleList)
 
@@ -29,10 +30,10 @@ prompt = PromptTemplate(
         "format_instructions": parser.get_format_instructions()},
 )
 
-_input = prompt.format_prompt(query=people_data)
+parser_input = prompt.format_prompt(query=people_data)
 
 model = ChatOpenAI()
-output = model.predict(_input.to_string())
+output = model.predict(parser_input.to_string())
 
-parsed = parser.parse(output)
-print(parsed)
+people_data_parsed = parser.parse(output)
+print(people_data_parsed)
